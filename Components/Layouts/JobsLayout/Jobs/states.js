@@ -283,14 +283,14 @@ const getHeadsNew = async(id, dispatch, reset) => {
       // })
       // paybleCharges = await tempCharge;
 
-      //let tempChargeHeadsArray = await calculateChargeHeadsTotal([...reciveableCharges, ...paybleCharges], "full");    
+      let tempChargeHeadsArray = await calculateChargeHeadsTotal([...reciveableCharges, ...paybleCharges], "full");    
       await reset({chargeList:[...x.data.result]});
       dispatch({type:'set', 
       payload:{
         // reciveableCharges,
         // paybleCharges,
         chargeLoad:false,
-        // ...tempChargeHeadsArray
+        ...tempChargeHeadsArray
       }})
     }
   });
