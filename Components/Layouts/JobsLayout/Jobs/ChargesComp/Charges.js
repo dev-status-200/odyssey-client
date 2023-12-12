@@ -56,49 +56,47 @@ const ChargesList = ({state, dispatch, type, append, reset, fields, chargeList, 
     }
 
     const permissionAssign=(perm, x)=>x.Invoice?.approved=="1"?true:false;
+    
+    const saveCharges = async () => {
+        if(!state.chargeLoad){
+            await dispatch({type:'toggle', fieldName:'chargeLoad', payload:true})
+            await saveHeads(chargeList, state, dispatch, reset);
+            //chargesData.refetch();
+        }
+    }
+
+    const appendCharge = ()=>{
+        if(!state.chargeLoad){
+        append({
+            type:type, description:'', basis:'', key_id:uuidv4(),
+            new:true,  ex_rate: parseFloat(state.exRate), pp_cc:state.selectedRecord.freightType=="Prepaid"?'PP':'CC', 
+            local_amount: 0,  size_type:'40HC', dg_type:state.selectedRecord.dg=="Mix"?"DG":state.selectedRecord.dg, 
+            qty:1, rate_charge:1, currency:'USD', amount:1, check: false, bill_invoice: '', charge: '', particular: '',
+            discount:0, tax_apply:false, taxPerc:0.00, tax_amount:0, net_amount:0, invoiceType:"", name: "", 
+            partyId:"", sep:false, status:'', approved_by:'', approval_date:'', InvoiceId:null, 
+            SEJobId:state.selectedRecord.id
+        })}
+    }
 
   return(
     <>
     <Row>
-        <Col style={{maxWidth:150}} className="">
-        <div className='div-btn-custom text-center py-1 fw-8'
-            onClick={()=>{
-            if(!state.chargeLoad){
-                append({
-                    type:type, description:'', basis:'', key_id:uuidv4(),
-                    new:true,  ex_rate: parseFloat(state.exRate), pp_cc:state.selectedRecord.freightType=="Prepaid"?'PP':'CC', 
-                    local_amount: 0,  size_type:'40HC', dg_type:state.selectedRecord.dg=="Mix"?"DG":state.selectedRecord.dg, 
-                    qty:1, rate_charge:1, currency:'USD', amount:1, check: false, bill_invoice: '', charge: '', particular: '',
-                    discount:0, tax_apply:false, taxPerc:0.00, tax_amount:0, net_amount:0, invoiceType:"", name: "", 
-                    partyId:"", sep:false, status:'', approved_by:'', approval_date:'', InvoiceId:null, 
-                    SEJobId:state.selectedRecord.id
-                })}}
-            }
-        >Add +</div>
+        <Col style={{maxWidth:150}}>
+            <div className='div-btn-custom text-center py-1 fw-8' onClick={appendCharge}>Add +</div>
         </Col>
         <Col>
-        <div className='div-btn-custom text-center mx-0 py-1 px-3' style={{float:'right'}} 
-            onClick={async () => {
-                if(!state.chargeLoad){
-                    await queryClient.removeQueries({ queryKey: ['charges'] })
-                    await dispatch({type:'toggle', fieldName:'chargeLoad', payload:true})
-                    await saveHeads(chargeList, state, dispatch, chargesData);
-                    chargesData.refetch();
-                }
-            }}
-        >Save Charges</div>
-        <div className='div-btn-custom-green text-center py-1 mx-2 px-3' style={{float:'right'}}
+        <div className='div-btn-custom mx-0 py-1 px-3 fl-right' onClick={saveCharges}>Save Charges</div>
+        <div className='div-btn-custom-green fl-right py-1 mx-2 px-3'
             onClick={async () => {
                 if(!state.chargeLoad){
                     dispatch({type:'toggle', fieldName:'chargeLoad', payload:true})
-                    await makeInvoice(chargeList, companyId, reset, operationType);
-                    await queryClient.removeQueries({ queryKey: ['charges'] })
-                    await delay(1500);
-                    await chargesData.refetch();
-                    dispatch({type:'set', payload:{
-                        chargeLoad:false,
-                        selection:{InvoiceId:null, partyId:null}
-                    }})
+                    await makeInvoice(chargeList, companyId, reset, operationType, dispatch, state);
+                    // await queryClient.removeQueries({ queryKey: ['charges'] })
+                    // await chargesData.refetch();
+                    // dispatch({type:'set', payload:{
+                    //     chargeLoad:false,
+                    //     selection:{InvoiceId:null, partyId:null}
+                    // }})
                 }
             }}
         >Generate Invoice No</div>

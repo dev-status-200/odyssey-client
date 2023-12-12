@@ -238,16 +238,35 @@ const getVendors = memoize(async(id) => {
 const saveHeads = async(charges, state, dispatch, reset) => {
   await axios.post(process.env.NEXT_PUBLIC_CLIMAX_SAVE_SE_HEADS_NEW, 
     { charges, deleteList:state.deleteList, id:state.selectedRecord.id, exRate:state.exRate }
-  );
+  ).then(async(x)=>{
+    if(x.data.status=="success"){
+      await getHeadsNew(state.selectedRecord.id, dispatch, reset)
+    }
+  })
+}
+async function getChargeHeads (id) {
+  let charges = [];
+  await axios.get(process.env.NEXT_PUBLIC_CLIMAX_GET_SE_HEADS_NEW,{
+    headers:{"id": `${id}`}
+  }).then((x)=>{
+    if(x.data.status=="success"){
+      charges = x.data.result;
+    }
+  });
+  let tempChargeHeadsArray = await calculateChargeHeadsTotal([...charges], "full");    
+  return {
+    charges,
+    ...tempChargeHeadsArray
+  }
 }
 
-const getHeadsNew = async(id, dispatch) => {
-  //dispatch({type:'toggle', fieldName:'chargeLoad', payload:true})
+const getHeadsNew = async(id, dispatch, reset) => {
+  dispatch({type:'toggle', fieldName:'chargeLoad', payload:true})
   let paybleCharges = [];
   let reciveableCharges = [];
   await axios.get(process.env.NEXT_PUBLIC_CLIMAX_GET_SE_HEADS_NEW,{
     headers:{"id": `${id}`}
-  }).then((x)=>{
+  }).then(async(x)=>{
     if(x.data.status=="success"){
       let tempCharge = [];
       x.data.result.forEach((x)=>{
@@ -255,18 +274,18 @@ const getHeadsNew = async(id, dispatch) => {
           tempCharge.push({...x, sep:false});
         }
       });
-      reciveableCharges = tempCharge;
+      reciveableCharges = await tempCharge;
       tempCharge = [];
       x.data.result.forEach((x)=>{
         if(x.type=='Payble'){
           tempCharge.push({...x, sep:false});
         }
       })
-      paybleCharges = tempCharge;
+      paybleCharges = await tempCharge;
     }
   });
-  let tempChargeHeadsArray = calculateChargeHeadsTotal([...reciveableCharges, ...paybleCharges], "full");    
-  //console.log(tempChargeHeadsArray)
+  let tempChargeHeadsArray = await calculateChargeHeadsTotal([...reciveableCharges, ...paybleCharges], "full");    
+  await reset({chargeList:[...reciveableCharges, ...paybleCharges]});
   dispatch({type:'set', 
   payload:{
     reciveableCharges,
@@ -321,11 +340,15 @@ const calculateChargeHeadsTotal = (chageHeads, type) => {
   return obj
 }
 
-const makeInvoice = async(list, companyId, reset, type) => {
+const makeInvoice = async(list, companyId, reset, type, dispatch, state) => {
   let tempList = list.filter((x)=>x.check);
   tempList.length>0?
     await axios.post(process.env.NEXT_PUBLIC_CLIMAX_POST_CREATE_INVOICE_NEW,{
       chargeList:tempList, companyId, type:type
+    }).then(async(x)=>{
+      if(x.data.status=="success"){
+        await getHeadsNew(state.selectedRecord.id, dispatch, reset)
+      }
     })
   :null
 }
