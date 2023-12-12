@@ -235,11 +235,17 @@ const getVendors = memoize(async(id) => {
   return result;
 })
 
-const saveHeads = async(charges, state, dispatch, reset) => {
-  await axios.post(process.env.NEXT_PUBLIC_CLIMAX_SAVE_SE_HEADS_NEW, 
+const saveHeads = (charges, state, dispatch, queryClient, chargesData) => {
+  axios.post(process.env.NEXT_PUBLIC_CLIMAX_SAVE_SE_HEADS_NEW, 
     { charges, deleteList:state.deleteList, id:state.selectedRecord.id, exRate:state.exRate }
-  );
-  //reset({chargeList:[]});
+  ).then(async()=>{
+    queryClient.removeQueries({ queryKey: ['charges'] })
+    await chargesData.refetch();
+    dispatch({type:'set', payload:{
+        chargeLoad:false,
+        selection:{InvoiceId:null, partyId:null}
+    }})
+  });
 }
 
 const getHeadsNew = async(id, dispatch) => {

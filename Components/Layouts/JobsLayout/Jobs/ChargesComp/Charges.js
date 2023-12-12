@@ -80,27 +80,20 @@ const ChargesList = ({state, dispatch, type, append, reset, fields, chargeList, 
         <div className='div-btn-custom text-center mx-0 py-1 px-3' style={{float:'right'}} 
             onClick={async () => {
                 if(!state.chargeLoad){
-                    dispatch({type:'toggle', fieldName:'chargeLoad', payload:true})
-                    await saveHeads(chargeList, state, dispatch, reset);
-                    await queryClient.removeQueries({ queryKey: ['charges'] })
-                    await delay(1000);
-                    await chargesData.refetch();
-                    dispatch({type:'set', payload:{
-                        chargeLoad:false,
-                        selection:{InvoiceId:null, partyId:null}
-                    }})
+                    await dispatch({type:'toggle', fieldName:'chargeLoad', payload:true})
+                    await saveHeads(chargeList, state, dispatch, queryClient, chargesData);
                 }
             }}
         >Save Charges</div>
         <div className='div-btn-custom-green text-center py-1 mx-2 px-3' style={{float:'right'}}
             onClick={async () => {
                 if(!state.chargeLoad){
-                    dispatch({type:'toggle', fieldName:'chargeLoad', payload:true})
+                    await dispatch({type:'toggle', fieldName:'chargeLoad', payload:true})
                     await makeInvoice(chargeList, companyId, reset, operationType);
                     await queryClient.removeQueries({ queryKey: ['charges'] })
                     await delay(1500);
                     await chargesData.refetch();
-                    dispatch({type:'set', payload:{
+                    await dispatch({type:'set', payload:{
                         chargeLoad:false,
                         selection:{InvoiceId:null, partyId:null}
                     }})
