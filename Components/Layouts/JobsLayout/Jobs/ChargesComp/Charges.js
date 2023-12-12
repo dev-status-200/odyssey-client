@@ -78,35 +78,29 @@ const ChargesList = ({state, dispatch, type, append, reset, fields, chargeList, 
         })}
     }
 
+    const generateInvoice = async () => {
+        if(!state.chargeLoad){
+            dispatch({type:'toggle', fieldName:'chargeLoad', payload:true})
+            await makeInvoice(chargeList, companyId, reset, operationType, dispatch, state);
+        }
+    }
+
   return(
-    <>
+<>
     <Row>
-        <Col style={{maxWidth:150}}>
-            <div className='div-btn-custom text-center py-1 fw-8' onClick={appendCharge}>Add +</div>
-        </Col>
-        <Col>
-        <div className='div-btn-custom mx-0 py-1 px-3 fl-right' onClick={saveCharges}>Save Charges</div>
-        <div className='div-btn-custom-green fl-right py-1 mx-2 px-3'
-            onClick={async () => {
-                if(!state.chargeLoad){
-                    dispatch({type:'toggle', fieldName:'chargeLoad', payload:true})
-                    await makeInvoice(chargeList, companyId, reset, operationType, dispatch, state);
-                    // await queryClient.removeQueries({ queryKey: ['charges'] })
-                    // await chargesData.refetch();
-                    // dispatch({type:'set', payload:{
-                    //     chargeLoad:false,
-                    //     selection:{InvoiceId:null, partyId:null}
-                    // }})
-                }
-            }}
-        >Generate Invoice No</div>
+    <Col style={{maxWidth:150}}>
+        <div className='div-btn-custom text-center py-1 fw-8' onClick={appendCharge}>Add +</div>
+    </Col>
+    <Col>
+        <div className='div-btn-custom mx-2 py-1 px-3 fl-right' onClick={saveCharges}>Save Charges</div>
+        <div className='div-btn-custom-green fl-right py-1 px-3' onClick={generateInvoice}>Generate Invoice No</div>
         <div className='mx-2' style={{float:'right'}}>
-        <InputNumber placeholder='Ex.Rate' size='small' className='my-1' min={"0.1"}  style={{position:'relative', bottom:2}}
-            value={state.exRate} onChange={(e)=>dispatch({type:'toggle',fieldName:'exRate',payload:e})} 
-        />
+            <InputNumber placeholder='Ex.Rate' size='small' className='my-1' min={"0.1"}  style={{position:'relative', bottom:2}}
+                value={state.exRate} onChange={(e)=>dispatch({type:'toggle',fieldName:'exRate',payload:e})} 
+            />
         </div>
         <div className='my-1' style={{float:'right'}}>Ex.Rate</div>
-        </Col>
+    </Col>
     </Row>
     <div className='table-sm-1 mt-3' style={{maxHeight:300, overflowY:'auto'}}>
     {!state.chargeLoad &&
@@ -345,7 +339,7 @@ const ChargesList = ({state, dispatch, type, append, reset, fields, chargeList, 
     </Modal>
     </div>
     <div className='div-btn-custom-green text-center py-1 px-3 mt-3' style={{float:'right'}} onClick={()=>{calculate(chargeList)}}>Calculate</div>
-    </>
+</>
   )
 }
 export default React.memo(ChargesList)

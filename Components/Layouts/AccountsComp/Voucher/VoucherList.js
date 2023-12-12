@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback} from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { useDispatch } from 'react-redux';
-import { Row, Col } from 'react-bootstrap';
+import { Row, Col, Spinner } from 'react-bootstrap';
 import { incrementTab } from '/redux/tabs/tabSlice';
 import Router from 'next/router';
 import moment from 'moment';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const commas = (a) => a==0?'0':parseFloat(a).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ", ")
 
@@ -42,6 +44,10 @@ const App = ({voucherData}) => {
     {headerName: 'Amount', field:'amount', filter: true, cellRendererSelector: () => amountDetails, filter: true},
     {headerName: 'Voucher Date', field:'createdAt', filter: true, cellRendererSelector: () => dateComp, filter: true},
   ]);
+  const [offset, setOffset] = useState(0);
+  const [page, setPage] = useState(0);
+  const [count, setCount] = useState(0);
+  const [pageLoad, setPageLoad] = useState(false)
 
   const defaultColDef = useMemo(()=> ({
     sortable: true
@@ -52,19 +58,37 @@ const App = ({voucherData}) => {
     Router.push(`/accounts/vouchers/${e.data.id}`);
   }, []);
 
+  const nextPage = (offsetValue) => {
+    setPageLoad(true)
+    axios.get(process.env.NEXT_PUBLIC_CLIMAX_GET_ALL_VOUCHERS,{
+      headers:{
+        "id":`${Cookies.get('companyId')}`,
+        "offset":`${offsetValue}`
+      }
+    }).then((x)=>{
+      offsetValue>offset?
+        setPage(page+1):
+        setPage(page-1)
+      setOffset(offsetValue)
+      setData(x.data);
+      setPageLoad(false)
+    });
+  }
+
   useEffect(() => {
-    const setData = async() => {
-      let tempData = voucherData.result
-      await tempData.forEach((x, i) => {
-        x.no = i+1
-        x.amount = x.Voucher_Heads?.reduce((x, cur) => x + Number(cur.amount), 0 ),
-        x.date = moment(x.createdAt).format("YYYY-MM-DD")
-      });
-      setRowData(tempData);
-      console.log(tempData)
-    }
-    setData();
+    setCount(parseInt(voucherData.count/30))
+    setData(voucherData);
   }, []);
+
+  const setData = async(data) => {
+    let tempData = data.result
+    await tempData.forEach((x, i) => {
+      x.no = i+1
+      x.amount = x.Voucher_Heads?.reduce((x, cur) => x + Number(cur.amount), 0 ),
+      x.date = moment(x.createdAt).format("YYYY-MM-DD")
+    });
+    setRowData(tempData);
+  }
 
   const getRowHeight = useCallback(() => {
     return 38;
@@ -95,6 +119,12 @@ const App = ({voucherData}) => {
         onCellClicked={cellClickedListener} 
         getRowHeight={getRowHeight}
       />
+    </div>
+    <div className='my-1'>
+      <button className='btn-custom-small px-3' onClick={()=>offset!=0?nextPage(offset-30):null}>Previous</button>
+      <span className='mx-3 fs-20'>{page}</span>
+      <button className='btn-custom-small px-4' onClick={()=>nextPage(offset+30)}>Next</button>
+      {pageLoad && <Spinner size='sm' className='mx-4' color={'red'} />}
     </div>
   </div>
   );
