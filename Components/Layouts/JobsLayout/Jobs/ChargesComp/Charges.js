@@ -96,7 +96,7 @@ const ChargesList = ({state, dispatch, type, append, reset, fields, chargeList, 
             onClick={async () => {
                 if(!state.chargeLoad){
                     dispatch({type:'toggle', fieldName:'chargeLoad', payload:true})
-                    await  makeInvoice(chargeList, companyId, reset, operationType);
+                    await makeInvoice(chargeList, companyId, reset, operationType);
                     await queryClient.removeQueries({ queryKey: ['charges'] })
                     await delay(1500);
                     await chargesData.refetch();
