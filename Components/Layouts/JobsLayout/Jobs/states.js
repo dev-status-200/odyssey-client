@@ -235,17 +235,10 @@ const getVendors = memoize(async(id) => {
   return result;
 })
 
-const saveHeads = (charges, state, dispatch, queryClient, chargesData) => {
-  axios.post(process.env.NEXT_PUBLIC_CLIMAX_SAVE_SE_HEADS_NEW, 
+const saveHeads = async(charges, state, dispatch, reset) => {
+  await axios.post(process.env.NEXT_PUBLIC_CLIMAX_SAVE_SE_HEADS_NEW, 
     { charges, deleteList:state.deleteList, id:state.selectedRecord.id, exRate:state.exRate }
-  ).then(async()=>{
-    queryClient.removeQueries({ queryKey: ['charges'] })
-    await chargesData.refetch();
-    dispatch({type:'set', payload:{
-        chargeLoad:false,
-        selection:{InvoiceId:null, partyId:null}
-    }})
-  });
+  );
 }
 
 const getHeadsNew = async(id, dispatch) => {
@@ -352,7 +345,7 @@ const getStatus = (val) => {
   return val[0]=="1"?true:false
 };
 
-const setHeadsCache = (chargesData, dispatch, reset) => {
+const setHeadsCache = async(chargesData, dispatch, reset) => {
   // chargesData.status=="success"?
   // dispatch({type:'set', 
   // payload:{
@@ -361,9 +354,13 @@ const setHeadsCache = (chargesData, dispatch, reset) => {
   //   ...chargesData.data
   //   //...tempChargeHeadsArray
   // }}):null;
-  chargesData?.data?.charges?.length>0?
+  await chargesData?.data?.charges?.length>0?
     reset({chargeList:[ ...chargesData.data.charges ]}):
-  null;
+    null;
+  dispatch({type:'set', payload:{
+    chargeLoad:false,
+    selection:{InvoiceId:null, partyId:null}
+  }})
 }
 
 export {
