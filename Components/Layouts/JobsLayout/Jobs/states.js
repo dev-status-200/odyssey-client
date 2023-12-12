@@ -1,6 +1,7 @@
 import * as yup from "yup";
 import axios from "axios";
 import moment from "moment";
+import { delay } from "/functions/delay";
 
 const SignupSchema = yup.object().shape({  });
 
@@ -207,11 +208,9 @@ const memoize = (fn) => {
   return (...args) => {
     let n = args[0];
     if (n in cache) {
-      //console.log('Fetching from cache', n);
       return cache[n];
     }
     else {
-      //console.log('Calculating result', n);
       let result = fn(n);
       cache[n] = result;
       return result;
@@ -234,31 +233,6 @@ const getVendors = memoize(async(id) => {
   .then((x) => x.data.result)
   return result;
 })
-
-const saveHeads = async(charges, state, dispatch, reset) => {
-  await axios.post(process.env.NEXT_PUBLIC_CLIMAX_SAVE_SE_HEADS_NEW, 
-    { charges, deleteList:state.deleteList, id:state.selectedRecord.id, exRate:state.exRate }
-  ).then(async(x)=>{
-    if(x.data.status=="success"){
-      await getHeadsNew(state.selectedRecord.id, dispatch, reset)
-    }
-  })
-}
-async function getChargeHeads (id) {
-  let charges = [];
-  await axios.get(process.env.NEXT_PUBLIC_CLIMAX_GET_SE_HEADS_NEW,{
-    headers:{"id": `${id}`}
-  }).then((x)=>{
-    if(x.data.status=="success"){
-      charges = x.data.result;
-    }
-  });
-  let tempChargeHeadsArray = await calculateChargeHeadsTotal([...charges], "full");    
-  return {
-    charges,
-    ...tempChargeHeadsArray
-  }
-}
 
 const getHeadsNew = async(id, dispatch, reset) => {
   dispatch({type:'toggle', fieldName:'chargeLoad', payload:true})
@@ -294,6 +268,34 @@ const getHeadsNew = async(id, dispatch, reset) => {
       }})
     }
   });
+}
+
+const saveHeads = async(charges, state, dispatch, reset) => {
+  await axios.post(process.env.NEXT_PUBLIC_CLIMAX_SAVE_SE_HEADS_NEW, 
+    { charges, deleteList:state.deleteList, id:state.selectedRecord.id, exRate:state.exRate }
+  ).then(async(x)=>{
+    if(x.data.status=="success"){
+      await delay(500)
+      await getHeadsNew(state.selectedRecord.id, dispatch, reset)
+      await getHeadsNew(state.selectedRecord.id, dispatch, reset)
+    }
+  })
+}
+
+async function getChargeHeads (id) {
+  let charges = [];
+  await axios.get(process.env.NEXT_PUBLIC_CLIMAX_GET_SE_HEADS_NEW,{
+    headers:{"id": `${id}`}
+  }).then((x)=>{
+    if(x.data.status=="success"){
+      charges = x.data.result;
+    }
+  });
+  let tempChargeHeadsArray = await calculateChargeHeadsTotal([...charges], "full");    
+  return {
+    charges,
+    ...tempChargeHeadsArray
+  }
 }
 
 const calculateChargeHeadsTotal = (chageHeads, type) => {
@@ -348,6 +350,8 @@ const makeInvoice = async(list, companyId, reset, type, dispatch, state) => {
       chargeList:tempList, companyId, type:type
     }).then(async(x)=>{
       if(x.data.status=="success"){
+        await delay(500)
+        await getHeadsNew(state.selectedRecord.id, dispatch, reset)
         await getHeadsNew(state.selectedRecord.id, dispatch, reset)
       }
     })
