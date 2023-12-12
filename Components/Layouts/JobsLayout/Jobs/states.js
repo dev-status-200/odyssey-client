@@ -268,31 +268,32 @@ const getHeadsNew = async(id, dispatch, reset) => {
     headers:{"id": `${id}`}
   }).then(async(x)=>{
     if(x.data.status=="success"){
-      let tempCharge = [];
-      x.data.result.forEach((x)=>{
-        if(x.type!='Payble'){
-          tempCharge.push({...x, sep:false});
-        }
-      });
-      reciveableCharges = await tempCharge;
-      tempCharge = [];
-      x.data.result.forEach((x)=>{
-        if(x.type=='Payble'){
-          tempCharge.push({...x, sep:false});
-        }
-      })
-      paybleCharges = await tempCharge;
+      // let tempCharge = [];
+      // x.data.result.forEach((x)=>{
+      //   if(x.type!='Payble'){
+      //     tempCharge.push({...x, sep:false});
+      //   }
+      // });
+      // reciveableCharges = await tempCharge;
+      // tempCharge = [];
+      // x.data.result.forEach((x)=>{
+      //   if(x.type=='Payble'){
+      //     tempCharge.push({...x, sep:false});
+      //   }
+      // })
+      // paybleCharges = await tempCharge;
+
+      //let tempChargeHeadsArray = await calculateChargeHeadsTotal([...reciveableCharges, ...paybleCharges], "full");    
+      await reset({chargeList:[...x.data.result]});
+      dispatch({type:'set', 
+      payload:{
+        // reciveableCharges,
+        // paybleCharges,
+        chargeLoad:false,
+        // ...tempChargeHeadsArray
+      }})
     }
   });
-  let tempChargeHeadsArray = await calculateChargeHeadsTotal([...reciveableCharges, ...paybleCharges], "full");    
-  await reset({chargeList:[...reciveableCharges, ...paybleCharges]});
-  dispatch({type:'set', 
-  payload:{
-    reciveableCharges,
-    paybleCharges,
-    chargeLoad:false,
-    ...tempChargeHeadsArray
-  }})
 }
 
 const calculateChargeHeadsTotal = (chageHeads, type) => {
