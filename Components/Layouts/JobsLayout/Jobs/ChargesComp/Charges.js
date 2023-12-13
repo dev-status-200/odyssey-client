@@ -111,7 +111,7 @@ const ChargesList = ({state, dispatch, type, append, reset, fields, chargeList, 
         <th>.</th>
         <th>Bill/Invoice</th>
         <th>Charge</th>
-        <th>Particular</th>
+        <th>Party</th>
         <th>Basis</th>
         <th>PP/CC</th>
         {(operationType=="SE"||operationType=="SI") &&<th>SizeType</th>}
@@ -126,7 +126,7 @@ const ChargesList = ({state, dispatch, type, append, reset, fields, chargeList, 
         <th style={{minWidth:100}}>Net Amount</th>
         <th>Ex.Rate</th>
         <th style={{minWidth:110}}>Local Amount</th>
-        <th>Name</th>
+        <th>Particular</th>
         <th>Status</th>
         <th style={{minWidth:110}}>Approved By</th>
         <th style={{minWidth:120}}>Approval Date</th>
@@ -235,7 +235,15 @@ const ChargesList = ({state, dispatch, type, append, reset, fields, chargeList, 
             options={state.fields.chargeList}
             />
         </td>
-        <td>{x.particular}</td>
+        <td className='text-center'>{/* Party Selection */}
+                {!x.invoice_id && <RightCircleOutlined style={{ position: 'relative', bottom: 3 }}
+                    onClick={() => {
+                        dispatch({ type: 'set', payload: { headIndex: index, headVisible: true } }); //<--Identifies the Head with there Index sent to modal
+                    }}
+                />
+                }
+                {x.name != "" ? <span className='m-2 '><Tag color="geekblue" style={{ fontSize: 15 }}>{x.name}</Tag></span> : ""}
+        </td>
         <td>{x.basis} {/* Basis */}
         </td>
         <td style={{ padding: 3, minWidth: 50 }}> {/* PP?CC */}
@@ -308,15 +316,7 @@ const ChargesList = ({state, dispatch, type, append, reset, fields, chargeList, 
             />}
         </td>
         <td>{x.local_amount}</td>
-        <td className='text-center'>{/* Party Selection */}
-                {!x.invoice_id && <RightCircleOutlined style={{ position: 'relative', bottom: 3 }}
-                    onClick={() => {
-                        dispatch({ type: 'set', payload: { headIndex: index, headVisible: true } }); //<--Identifies the Head with there Index sent to modal
-                    }}
-                />
-                }
-                {x.name != "" ? <span className='m-2 '><Tag color="geekblue" style={{ fontSize: 15 }}>{x.name}</Tag></span> : ""}
-        </td>
+        <td>{x.particular}</td>
         <td>Un-Approved</td><td></td><td></td>
         </tr>
         }

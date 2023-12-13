@@ -7,6 +7,7 @@ import Router from 'next/router';
 import moment from 'moment';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import PopConfirm from '../../../Shared/PopConfirm';
 
 const commas = (a) => a==0?'0':parseFloat(a).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ", ")
 
@@ -34,6 +35,26 @@ const App = ({voucherData}) => {
       <span className='fw-6 fs-12'>{moment(props.data.createdAt).format("YYYY-MM-DD")}</span>
     </>
   };
+  const deleteComp = {
+    component: (props)=> <>
+     <div className='px-2'
+      onClick={() => {
+        console.log("Here")
+        PopConfirm("Confirmation", "Are You Sure To Remove This Charge?",
+        () => {
+          axios.post(process.env.NEXT_PUBLIC_CLIMAX_POST_DELETE_BASE_VOUCHER,{
+            id:props.data.id
+          }).then((x)=>{
+            console.log(x.data);
+            Router.push("/accounts/voucherList")
+          })
+        })
+      }}
+     >
+      <span className='fs-15 btn-red-two'>x</span>
+     </div>
+    </>
+  };
 
   const [columnDefs, setColumnDefs] = useState([
     {headerName: '#', field:'no', width: 40 },
@@ -43,6 +64,7 @@ const App = ({voucherData}) => {
     {headerName: 'Paid To', field:'payTo',      filter: true},
     {headerName: 'Amount', field:'amount', filter: true, cellRendererSelector: () => amountDetails, filter: true},
     {headerName: 'Voucher Date', field:'createdAt', filter: true, cellRendererSelector: () => dateComp, filter: true},
+    {headerName: 'Delete', cellRendererSelector: () => deleteComp},
   ]);
   const [offset, setOffset] = useState(0);
   const [page, setPage] = useState(0);
@@ -54,8 +76,10 @@ const App = ({voucherData}) => {
   }));
 
   const cellClickedListener = useCallback((e)=> {
-    dispatch(incrementTab({"label":"Voucher","key":"3-5","id":`${e.data.id}`}));
-    Router.push(`/accounts/vouchers/${e.data.id}`);
+    if(e.colDef.headerName!="Delete"){
+      dispatch(incrementTab({"label":"Voucher","key":"3-5","id":`${e.data.id}`}));
+      Router.push(`/accounts/vouchers/${e.data.id}`);
+    }
   }, []);
 
   const nextPage = (offsetValue) => {
@@ -82,7 +106,7 @@ const App = ({voucherData}) => {
 
   const setData = async(data) => {
     let tempData = data.result
-    await tempData.forEach((x, i) => {
+    await tempData?.forEach((x, i) => {
       x.no = i+1
       x.amount = x.Voucher_Heads?.reduce((x, cur) => x + Number(cur.amount), 0 ),
       x.date = moment(x.createdAt).format("YYYY-MM-DD")

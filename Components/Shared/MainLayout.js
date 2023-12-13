@@ -58,7 +58,6 @@ const MainLayout = ({children}) => {
   };
 
   useEffect(() => {
-    console.log(newRouter.pathname)
     // When visiting pages inside folders the initial path in url confilts, so to this is mandatory for resolving it
     if(newRouter.pathname.includes("/clearanceJobs/import/sea/[id]")){
       setToggleState('9-4');
@@ -201,6 +200,7 @@ const MainLayout = ({children}) => {
   });
   
   const memoizedAlterTabs = () => {
+    console.log("Here")
     if(Object.keys(tabs).length>0){
       let tempTabs = [...tabItems];
       let cancel = false;
@@ -282,9 +282,11 @@ const MainLayout = ({children}) => {
         setTabActive(tempTabActive);
       }
     }
+    toggleTab(tabs)
   };
 
   useEffect(() => memoizedAlterTabs(), [tabs]);
+
   const setKey = (value) => {
     let result = "";
     let index = 0;
@@ -308,6 +310,7 @@ const MainLayout = ({children}) => {
   }
 
   const toggleTab = (x) => {
+
     setToggleState(x.key);
     if(x.key=='1-1'){ Router.push('/dashboard/home') }
     else if(x.key=='1-2'){ Router.push('/dashboard/requests') }
@@ -324,7 +327,7 @@ const MainLayout = ({children}) => {
     else if(x.key=='3-2'){ Router.push('/accounts/accountActivity') }
     else if(x.key=='3-3'){ Router.push('/accounts/invoiceAndBills') }
     else if(x.key=='3-4'){ Router.push(`/accounts/paymentReceipt/${setKey(x)}`) }
-    else if(x.key=='3-5'){ Router.push(`/accounts/vouchers/${setKey(x)}`)} //these routes are also settled in 2nd useEffect
+    else if(x.key=='3-5'){ Router.push(`/accounts/vouchers/${setKey(x)||'new'}`)} //these routes are also settled in 2nd useEffect
     else if(x.key=='3-6'){ Router.push('/accounts/voucherList') }
     else if(x.key=='3-7'){ Router.push('/accounts/officeVouchers/list') }
     else if(x.key=='3-8'){ Router.push(`/accounts/officeVouchers/${setKey(x)}`) }
@@ -374,6 +377,7 @@ const MainLayout = ({children}) => {
   };
 
   const removeTab = (index) => {
+    
     let tempTabs = [...tabItems];
     tempTabs = tempTabs.filter((x)=>{
       return x.key!=index

@@ -178,8 +178,22 @@
   border: none;
   cursor: pointer;
 }
+.btn-red-two{
+  color: rgb(146, 26, 18)!important;
+  background-color: rgb(255, 255, 255);
+  border-radius: 15px;
+  border: none;
+  cursor: pointer;
+  padding-bottom: 4px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+.btn-red-two:hover{
+  color: rgb(255, 255, 255)!important;
+  background-color: rgb(146, 26, 18)!important;
+}
 .btn-red-disabled{
-  background-color: rgb(103, 57, 54)!important;;
+  background-color: rgb(103, 57, 54)!important;
   color: white;
   padding: 5px 20px 5px 20px;
   border-radius: 15px;
