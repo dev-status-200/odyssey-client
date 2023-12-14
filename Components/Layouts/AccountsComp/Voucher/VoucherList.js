@@ -39,13 +39,11 @@ const App = ({voucherData}) => {
     component: (props)=> <>
      <div className='px-2'
       onClick={() => {
-        console.log("Here")
         PopConfirm("Confirmation", "Are You Sure To Remove This Charge?",
         () => {
           axios.post(process.env.NEXT_PUBLIC_CLIMAX_POST_DELETE_BASE_VOUCHER,{
             id:props.data.id
           }).then((x)=>{
-            console.log(x.data);
             Router.push("/accounts/voucherList")
           })
         })
@@ -75,10 +73,10 @@ const App = ({voucherData}) => {
     sortable: true
   }));
 
-  const cellClickedListener = useCallback((e)=> {
+  const cellClickedListener = useCallback(async(e)=> {
     if(e.colDef.headerName!="Delete"){
+      await Router.push(`/accounts/vouchers/${e.data.id}`);
       dispatch(incrementTab({"label":"Voucher","key":"3-5","id":`${e.data.id}`}));
-      Router.push(`/accounts/vouchers/${e.data.id}`);
     }
   }, []);
 
@@ -124,9 +122,9 @@ const App = ({voucherData}) => {
       <Col><h5>Voucher Details</h5></Col>
       <Col>
         <button className='btn-custom right'
-          onClick={()=>{
+          onClick={async()=>{
+            await Router.push(`/accounts/vouchers/new`)
             dispatch(incrementTab({"label":"Voucher","key":"3-5","id":"new"}))
-            Router.push(`/accounts/vouchers/new`)
           }}
         > Create </button>
       </Col>

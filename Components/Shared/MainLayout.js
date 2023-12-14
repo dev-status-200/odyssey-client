@@ -200,7 +200,7 @@ const MainLayout = ({children}) => {
   });
   
   const memoizedAlterTabs = () => {
-    console.log("Here")
+    // console.log("Here")
     if(Object.keys(tabs).length>0){
       let tempTabs = [...tabItems];
       let cancel = false;
@@ -310,8 +310,8 @@ const MainLayout = ({children}) => {
   }
 
   const toggleTab = (x) => {
-
     setToggleState(x.key);
+    //console.log(x.key)
     if(x.key=='1-1'){ Router.push('/dashboard/home') }
     else if(x.key=='1-2'){ Router.push('/dashboard/requests') }
     else if(x.key=='2-1'){ Router.push('/employees') }
@@ -328,11 +328,12 @@ const MainLayout = ({children}) => {
     else if(x.key=='3-3'){ Router.push('/accounts/invoiceAndBills') }
     else if(x.key=='3-4'){ Router.push(`/accounts/paymentReceipt/${setKey(x)}`) }
     else if(x.key=='3-5'){ 
-      console.log();
-      if(setKey(x)==undefined){
-        Router.push('/accounts/vouchers/new')
-      } else {
+      //console.log(x);
+      if(x.id){
         Router.push(`/accounts/vouchers/${setKey(x)}`)
+      } else {
+        setKey({...x, id:'new'})
+        Router.push(`/accounts/vouchers/new`)
       }
     } //these routes are also settled in 2nd useEffect
     else if(x.key=='3-6'){ Router.push('/accounts/voucherList') }
